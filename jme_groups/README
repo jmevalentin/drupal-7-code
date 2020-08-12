@@ -1,0 +1,18 @@
+=== MODULE NAME ===
+ jme_groups
+
+=== PURPOSE ===
+ Provide custom Organic Groups functionality
+
+=== Q&A ===
+What challenges were you trying to solve?
+- Managing users and groups with the base OG module is cumbersome. This module provides enhancements that make this easier, including a custom form to select users and add/remove them to/from groups
+
+What did you enjoy about the project?
+- Organic groups is a great way to divde and manage user access, but it's a bit cumbersome. I was able to come up with interfaces to improve the user experience.
+
+What would you do differently if you could do it over?
+- I would spend more time searching for available solutions and testing those  I found. Timelines prevented this.
+- I would document more thoroughly
+- I would not name functions after my initials
+
