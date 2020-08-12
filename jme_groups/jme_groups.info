@@ -1,0 +1,8 @@
+name = Jme Groups Utilities
+description = Specialized functionality for Organic Groups content
+package = Jamie Valentin
+version = 1.0
+core = 7.x
+
+files[] = inc/jme_groups.project_users.inc
+files[] = inc/jme_groups.helper.inc

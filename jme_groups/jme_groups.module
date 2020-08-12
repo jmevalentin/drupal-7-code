@@ -1,0 +1,76 @@
+<?php
+
+/**
+ * @file
+ * Main module functionality for Groups Utilities module.
+ */
+
+/* Implements hook_block_info() */
+function jme_groups_block_info() {
+  $blocks = array ();
+  $blocks ['jme_groups_project_user_mgmt'] = array (
+      'info' => t( 'Project User Management Form' ),
+      'cache' => DRUPAL_NO_CACHE
+  );
+  return $blocks;
+}
+
+/* Implements hook_block_view() */
+function jme_groups_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'jme_groups_project_user_mgmt' :
+      module_load_include ( 'inc', 'node', 'node.pages' );
+      $module_path = drupal_get_path ( 'module', 'jme_groups' );
+      require_once ($module_path . '/inc/jme_groups.project_users.inc');
+      $block ['content'] = drupal_get_form ( 'jme_groups_project_user_mgmt_form' );
+			break;
+    default :
+      break;
+  }
+
+  return $block;
+}
+
+/* Implementation of hook_views_query_alter */
+function jme_groups_views_query_alter(&$view, &$query) {
+
+  if ( $view->name == 'og_massadd' && isset($query->fields['og_og_selective']) ) {
+    $url = explode ( "/", request_uri () );
+    $project = 'eventroom-project1/' . $url [4];
+    $pnode = drupal_lookup_path ( 'source', $project );
+    $gid = str_replace ( 'node/', '', $pnode );
+    // $group_members = _get_users_in_group($gid);
+    $userslist = '';
+    $users = array ();
+    foreach ( $group_members as $member ) {
+      // Load the user object if necessary
+      // $user = user_load($member->uid);
+      $users [] = $member->uid;
+      $userslist = ',' . $member->uid;
+    }
+    $userslist = substr ( $userslist, 1 );
+
+    $query->where [0] ['clauses'] [2] = 'users.uids NOT IN (8)';
+  }
+}
+function jme_groups_og_membership_insert(OgMembership $og_membership) {
+  $result = db_select ( 'node', 'n' )->fields ( 'n', array (
+      'type'
+  ) )->condition ( 'nid', $og_membership->gid, '=' )->execute ()->fetchAllKeyed ( 0, 0 );
+  $type = array_pop ( $result );
+
+  // Including mail.inc for optout check code
+  $incpath = drupal_get_path ( 'module', 'jme_utils' );
+  require_once ($incpath . '/inc/jme_utils.mail.inc');
+
+  if ($type == 'jme_projects' && $og_membership->entity_type == 'user') {
+    // dpm($og_membership);
+
+    $optoutcheck = optout_check ( $og_membership->etid, NOTIFY_ADDED_TO_PROJECT );
+    if (! $optoutcheck) {
+      emailProjectMember ( $og_membership->gid, $og_membership->etid );
+    }
+  }
+}
